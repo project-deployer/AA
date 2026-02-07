@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import ChatMessages from "./chat/ChatMessages";
 import ChatInput from "./chat/ChatInput";
 import { getCropImageUrl } from "../../utils/cropImages";
@@ -10,7 +10,6 @@ interface Props {
 }
 
 export default function CenterPanel({ fieldId, cropName, fieldName }: Props) {
-  const messagesEndRef = useRef<HTMLDivElement>(null);
   const [chatRefreshKey, setChatRefreshKey] = useState(0);
   const handleChatSent = () => {
     setChatRefreshKey((k) => k + 1);

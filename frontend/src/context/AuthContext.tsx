@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
+import React, { createContext, useContext, useState, useCallback } from "react";
 
 const STORAGE_KEY = "agriai_auth";
 

@@ -27,10 +27,11 @@ export function ensureRecaptcha(containerId = "recaptcha-container") {
   // @ts-ignore
   if (!(window as any).recaptchaVerifier) {
     // Invisible reCAPTCHA
+    const authInstance = auth as ReturnType<typeof getAuth>;
     (window as any).recaptchaVerifier = new RecaptchaVerifier(
       containerId,
       { size: "invisible" },
-      auth as ReturnType<typeof getAuth>
+      authInstance
     );
   }
   return (window as any).recaptchaVerifier as RecaptchaVerifier;

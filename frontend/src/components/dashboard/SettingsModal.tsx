@@ -65,7 +65,7 @@ export default function SettingsModal({ onClose, onLogout }: Props) {
                 {profileImage ? (
                   <img
                     src={profileImage}
-                    alt={farmerName}
+                    alt={farmerName || "Profile"}
                     className="w-24 h-24 rounded-2xl object-cover ring-4 ring-green-200"
                   />
                 ) : (
