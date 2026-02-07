@@ -21,19 +21,33 @@ export function initFirebase() {
   return { app, auth };
 }
 
+// export function ensureRecaptcha(containerId = "recaptcha-container") {
+//   if (!auth) initFirebase();
+//   if (!auth) throw new Error("Firebase not initialized");
+//   // @ts-ignore
+//   if (!(window as any).recaptchaVerifier) {
+//     // Invisible reCAPTCHA
+//     const authInstance = auth as ReturnType<typeof getAuth>;
+//     (window as any).recaptchaVerifier = new RecaptchaVerifier(
+//       containerId,
+//       { size: "invisible" },
+//       authInstance
+//     );
+//   }
+//   return (window as any).recaptchaVerifier as RecaptchaVerifier;
+// }
 export function ensureRecaptcha(containerId = "recaptcha-container") {
   if (!auth) initFirebase();
   if (!auth) throw new Error("Firebase not initialized");
-  // @ts-ignore
+
   if (!(window as any).recaptchaVerifier) {
-    // Invisible reCAPTCHA
-    const authInstance = auth as ReturnType<typeof getAuth>;
     (window as any).recaptchaVerifier = new RecaptchaVerifier(
+      auth,
       containerId,
-      { size: "invisible" },
-      authInstance
+      { size: "invisible" }
     );
   }
+
   return (window as any).recaptchaVerifier as RecaptchaVerifier;
 }
 
