@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="2048" height="2048" viewBox="0 0 1024 1024" role="img" aria-label="AgriAI app icon">
+  <defs>
+    <linearGradient id="bgN" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#EAFCE8"/>
+      <stop offset="100%" stop-color="#A8E06B"/>
+    </linearGradient>
+    <radialGradient id="sunN" cx="50%" cy="36%" r="30%">
+      <stop offset="0%" stop-color="#FFF6DF"/>
+      <stop offset="100%" stop-color="#FFB35D" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="leafN" x1="0" x2="1">
+      <stop offset="0%" stop-color="#2E8B3A"/>
+      <stop offset="100%" stop-color="#7BD06A"/>
+    </linearGradient>
+    <filter id="dropN" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="18" />
+    </filter>
+  </defs>
+
+  <rect x="32" y="32" width="960" height="960" rx="200" fill="url(#bgN)" />
+  <circle cx="512" cy="300" r="200" fill="url(#sunN)" />
+
+  <g transform="translate(0,380) scale(1,0.75)">
+    <path d="M48 320 C180 270 280 295 512 280 C744 265 844 240 976 320 L976 360 L48 360 Z" fill="#73c044" />
+    <path d="M48 280 C180 235 300 255 512 245 C724 235 844 220 976 280 L976 320 L48 320 Z" fill="#61b63a" />
+  </g>
+
+  <g transform="translate(512,420)">
+    <ellipse cx="0" cy="200" rx="120" ry="28" fill="#000" opacity="0.12" />
+    <path d="M0 120 C6 80 20 40 12 8 C8 -12 6 -40 0 -84" fill="none" stroke="#4fae3a" stroke-width="18" stroke-linecap="round" />
+    <path d="M6 8 C-40 -10 -110 18 -130 70 C-114 66 -86 50 -26 46 C-6 44 6 26 6 8 Z" fill="url(#leafN)" />
+    <path d="M-6 8 C40 -10 110 18 130 70 C114 66 86 50 26 46 C6 44 -6 26 -6 8 Z" fill="url(#leafN)" />
+  </g>
+</svg>

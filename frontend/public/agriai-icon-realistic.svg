@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="2048" height="2048" viewBox="0 0 1024 1024" role="img" aria-label="AgriAI realistic app icon">
+  <defs>
+    <linearGradient id="bgGradR" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#E9F9E9"/>
+      <stop offset="60%" stop-color="#A8E06B"/>
+      <stop offset="100%" stop-color="#FFE8B2"/>
+    </linearGradient>
+
+    <radialGradient id="sunCore" cx="50%" cy="35%" r="28%">
+      <stop offset="0%" stop-color="#FFF3D1" stop-opacity="1"/>
+      <stop offset="60%" stop-color="#FFD07A" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#FF9E4A" stop-opacity="0.0"/>
+    </radialGradient>
+
+    <linearGradient id="leafGrad" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#1B8A36"/>
+      <stop offset="60%" stop-color="#59C063"/>
+      <stop offset="100%" stop-color="#A8E77F"/>
+    </linearGradient>
+
+    <linearGradient id="stemGrad" x1="0" x2="1">
+      <stop offset="0%" stop-color="#2B7B2E"/>
+      <stop offset="100%" stop-color="#6FCF64"/>
+    </linearGradient>
+
+    <linearGradient id="goldGrad" x1="0" x2="1">
+      <stop offset="0%" stop-color="#FFE082"/>
+      <stop offset="100%" stop-color="#F2B44C"/>
+    </linearGradient>
+
+    <filter id="softDrop" x="-40%" y="-40%" width="180%" height="180%">
+      <feOffset dx="0" dy="18" result="off"/>
+      <feGaussianBlur stdDeviation="28" in="off" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0  0 0 0 0 0.1  0 0 0 0 0  0 0 0 0.8 0"/>
+      <feBlend in="SourceGraphic" in2="blur" mode="normal"/>
+    </filter>
+
+    <filter id="emboss" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2" result="blur"/>
+      <feSpecularLighting in="blur" surfaceScale="1.5" specularConstant="0.35" specularExponent="12" lighting-color="#ffffff" result="spec">
+        <fePointLight x="-300" y="-200" z="600"/>
+      </feSpecularLighting>
+      <feComposite in="spec" in2="SourceAlpha" operator="in"/>
+    </filter>
+
+    <pattern id="soilTexture" patternUnits="userSpaceOnUse" width="40" height="40">
+      <rect width="40" height="40" fill="rgba(0,0,0,0)" />
+      <path d="M0 30 Q10 28 20 30 T40 30" stroke="#000" stroke-opacity="0.03" stroke-width="1" fill="none" />
+    </pattern>
+  </defs>
+
+  <!-- Rounded square base with subtle bevel -->
+  <g filter="url(#softDrop)">
+    <rect x="32" y="32" width="960" height="960" rx="200" ry="200" fill="url(#bgGradR)" stroke="#ffffff" stroke-opacity="0.06"/>
+  </g>
+
+  <!-- Slight inner vignette -->
+  <ellipse cx="512" cy="520" rx="380" ry="280" fill="black" opacity="0.03" />
+
+  <!-- Sun glow layer -->
+  <circle cx="512" cy="300" r="200" fill="url(#sunCore)" />
+
+  <!-- Terraced fields with texture and gentle curves -->
+  <g transform="translate(0,380) scale(1,0.75)">
+    <path d="M48 320 C180 270 280 295 512 280 C744 265 844 240 976 320 L976 360 L48 360 Z" fill="#6fb53a" />
+    <path d="M48 280 C180 235 300 255 512 245 C724 235 844 220 976 280 L976 320 L48 320 Z" fill="#67b034" />
+    <rect x="48" y="320" width="928" height="40" fill="url(#soilTexture)" opacity="0.08" />
+    <path d="M48 240 C180 210 300 220 512 215 C724 210 844 200 976 240 L976 280 L48 280 Z" fill="#5aa42d" />
+  </g>
+
+  <!-- AI circuit lines merging from right, with soft glow and blending -->
+  <g transform="translate(0,0)" opacity="0.9">
+    <path d="M820 420 C860 400 900 380 956 336" stroke="#F6D98D" stroke-width="6" stroke-linecap="round" fill="none" opacity="0.5"/>
+    <circle cx="820" cy="420" r="6" fill="#F6D98D" opacity="0.7"/>
+    <path d="M860 460 C900 440 936 420 972 388" stroke="#F6D98D" stroke-width="4" stroke-linecap="round" fill="none" opacity="0.36"/>
+    <circle cx="860" cy="460" r="4" fill="#F6D98D" opacity="0.6"/>
+  </g>
+
+  <!-- Central plant with more realistic leaf shaping, veins and subtle shadow -->
+  <g transform="translate(512,420)">
+    <!-- ground shadow -->
+    <ellipse cx="0" cy="200" rx="120" ry="28" fill="#000" opacity="0.12" />
+
+    <!-- stem -->
+    <path d="M0 120 C6 80 20 40 12 8 C8 -12 6 -40 0 -84" fill="none" stroke="url(#stemGrad)" stroke-width="18" stroke-linecap="round" stroke-linejoin="round" />
+
+    <!-- left leaf base -->
+    <path id="leafL" d="M6 8 C-40 -10 -110 18 -130 70 C-114 66 -86 50 -26 46 C-6 44 6 26 6 8 Z" fill="url(#leafGrad)" stroke="#2b7e2f" stroke-width="1"/>
+    <!-- left leaf veins -->
+    <g opacity="0.45" stroke="#145b1a" stroke-width="1.2" stroke-linecap="round">
+      <path d="M-16 10 C-42 2 -86 18 -112 52" fill="none"/>
+      <path d="M-28 22 C-56 18 -90 34 -114 58" fill="none"/>
+    </g>
+
+    <!-- right leaf base -->
+    <path id="leafR" d="M-6 8 C40 -10 110 18 130 70 C114 66 86 50 26 46 C6 44 -6 26 -6 8 Z" fill="url(#leafGrad)" stroke="#2b7e2f" stroke-width="1"/>
+    <!-- right leaf veins -->
+    <g opacity="0.45" stroke="#145b1a" stroke-width="1.2" stroke-linecap="round">
+      <path d="M16 10 C42 2 86 18 112 52" fill="none"/>
+      <path d="M28 22 C56 18 90 34 114 58" fill="none"/>
+    </g>
+
+    <!-- small central leaf for depth -->
+    <path d="M-10 2 C-18 -8 -8 -26 10 -28 C6 -12 -2 -2 -10 2" fill="#4CAF50" opacity="0.98" />
+
+    <!-- leaf glossy highlights -->
+    <path d="M-36 0 C-20 -6 10 -14 36 2" fill="none" stroke="#FFFFFF" stroke-opacity="0.12" stroke-width="6" stroke-linecap="round"/>
+    <path d="M36 0 C20 -6 -10 -14 -36 2" fill="none" stroke="#FFFFFF" stroke-opacity="0.12" stroke-width="6" stroke-linecap="round"/>
+  </g>
+
+  <!-- soft glossy overlay along top-left -->
+  <path d="M120 96 C220 40 372 32 512 32 C652 32 804 40 904 96 L904 64 C804 24 652 16 512 16 C372 16 220 24 120 64 Z" fill="rgba(255,255,255,0.08)" />
+
+  <!-- App name integrated subtly at bottom (keeps inside icon, but lower-contrast) -->
+  <g transform="translate(0,592)">
+    <text x="50%" y="240" text-anchor="middle" font-family="Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial" font-weight="700" font-size="56" fill="url(#goldGrad)" letter-spacing="-0.5">AgriAI</text>
+  </g>
+
+</svg>
