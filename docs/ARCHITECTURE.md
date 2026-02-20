@@ -4,7 +4,7 @@
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                           CLIENT (React + Vite)                              │
+│                           CLIENT (React + Vite)                             │
 ├─────────────┬───────────────────────────────────┬───────────────────────────┤
 │  Left Panel │     Center Panel (AI Chat)        │   Right Panel (My Plan)   │
 │  - Crops    │     - ChatGPT-style interface     │   - Weather, Progress     │
