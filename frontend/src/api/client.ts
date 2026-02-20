@@ -53,6 +53,10 @@ export const api = {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       }),
+    score: (token: string, id: number) =>
+      request<CropRecommendationItem>(`/crops/${id}/score`, {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
   },
   chat: {
     send: (token: string, fieldId: number, content: string) =>
@@ -72,13 +76,33 @@ export const api = {
         headers: { Authorization: `Bearer ${token}` },
       }),
   },
+  recommend: {
+    generate: (token: string, data: RecommendInput) =>
+      request<RecommendResponse>("/recommend", {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+    history: (token: string, fieldId?: number) =>
+      request<RecommendationHistoryItem[]>(`/recommend/history${fieldId ? `?field_id=${fieldId}` : ""}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+  },
+  weather: {
+    byLocation: (token: string, location: string) =>
+      request<WeatherResponse>(`/weather/${encodeURIComponent(location)}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+  },
 };
 
 export interface CreateCropInput {
   name?: string;
   land_area_acres: number;
   soil_type: string;
-  crop_name: string;
+  crop_name?: string;
+  location: string;
+  season: "kharif" | "rabi" | "zaid";
   water_availability: "low" | "medium" | "high";
   investment_level: "low" | "medium" | "high";
 }
@@ -133,4 +157,52 @@ export interface PlanResponse {
   current_time: string;
   duration_progress: number;
   plan: CropPlan;
+}
+
+export interface WeatherResponse {
+  location: string;
+  temperature_c: number;
+  rainfall_mm: number;
+  condition: string;
+  source: string;
+}
+
+export interface CropRecommendationItem {
+  crop_name: string;
+  suitability_score: number;
+  risk_score: "Low" | "Medium" | "High";
+  expected_yield_estimation: string;
+  estimated_investment_cost: number;
+  estimated_profit_min: number;
+  estimated_profit_max: number;
+}
+
+export interface RecommendInput {
+  soil_type: string;
+  area_acres: number;
+  location: string;
+  season: "kharif" | "rabi" | "zaid";
+  water_availability: "low" | "medium" | "high";
+  investment_level: "low" | "medium" | "high";
+  field_id?: number;
+}
+
+export interface RecommendResponse {
+  recommendation_id: number;
+  weather: WeatherResponse;
+  recommendations: CropRecommendationItem[];
+}
+
+export interface RecommendationHistoryItem {
+  id: number;
+  field_id: number | null;
+  soil_type: string;
+  area_acres: number;
+  location: string;
+  season: string;
+  water_availability: string;
+  investment_level: string;
+  weather: WeatherResponse | null;
+  recommendations: CropRecommendationItem[];
+  created_at: string;
 }

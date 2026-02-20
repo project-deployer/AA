@@ -4,14 +4,11 @@ import { useAuth } from "../../context/AuthContext";
 import { api } from "../../api/client";
 import { isFirebaseConfigured } from "../../config/firebase";
 import LaunchHeader from "./LaunchHeader";
-import { initFirebase, sendOtp, getIdToken, signInWithGoogle, ensureRecaptcha } from "../../utils/firebaseClient";
+import { initFirebase, getIdToken, signInWithGoogle } from "../../utils/firebaseClient";
 
 export default function LoginScreen({ onBack }: { onBack?: () => void }) {
   const [isSignUp, setIsSignUp] = useState(false);
-  const [phone, setPhone] = useState("");
   const [farmerName, setFarmerName] = useState("");
-  const [otp, setOtp] = useState("");
-  const [step, setStep] = useState<"phone" | "otp">("phone");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const { setAuth } = useAuth();
@@ -39,73 +36,6 @@ export default function LoginScreen({ onBack }: { onBack?: () => void }) {
   const handleOfflineEntry = () => {
     setAuth("dev_offline_" + Date.now(), 1);
     navigate("/dashboard", { replace: true });
-  };
-
-  const handlePhoneSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!phone.trim()) {
-      setError("Please enter a valid phone number");
-      return;
-    }
-    if (isSignUp && !farmerName.trim()) {
-      setError("Please enter your name");
-      return;
-    }
-    setError("");
-    if (!isFirebaseConfigured) {
-      setError("Firebase not configured. Use Continue (Dev).");
-      return;
-    }
-    setLoading(true);
-    try {
-      initFirebase();
-      ensureRecaptcha();
-      // Format phone with +91 country code for India
-      const formatted = phone.startsWith("+") ? phone : `+91${phone}`;
-      const confirmation = await sendOtp(formatted);
-      (window as any)._firebaseConfirmation = confirmation;
-      (window as any)._firebasePhone = formatted;
-      (window as any)._firebaseFarmerName = farmerName;
-      setStep("otp");
-      setError("");
-    } catch (err: any) {
-      const errMsg = err?.message || String(err);
-      setError(errMsg);
-      console.error("OTP send error:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleVerifyOtp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    if (!otp.trim()) {
-      setError("Please enter the OTP");
-      return;
-    }
-    setLoading(true);
-    try {
-      const confirmation = (window as any)._firebaseConfirmation;
-      if (!confirmation) throw new Error("No OTP session found. Please send OTP again.");
-      const credential = await confirmation.confirm(otp);
-      const user = credential.user;
-      const idToken = await getIdToken(user);
-      const farmerNameFromStorage = (window as any)._firebaseFarmerName || user.displayName || "Farmer";
-      const res = await api.auth.verify(idToken, {
-        phone: user.phoneNumber || undefined,
-        email: user.email || undefined,
-        display_name: farmerNameFromStorage,
-      });
-      setAuth(idToken, res.farmer_id, farmerNameFromStorage);
-      navigate("/dashboard", { replace: true });
-    } catch (err: any) {
-      const errMsg = err?.message || String(err);
-      setError(errMsg);
-      console.error("OTP verify error:", err);
-    } finally {
-      setLoading(false);
-    }
   };
 
   const handleGoogle = async () => {
@@ -140,10 +70,7 @@ export default function LoginScreen({ onBack }: { onBack?: () => void }) {
   };
 
   const resetForm = () => {
-    setStep("phone");
-    setPhone("");
     setFarmerName("");
-    setOtp("");
     setError("");
   };
 
@@ -161,65 +88,22 @@ export default function LoginScreen({ onBack }: { onBack?: () => void }) {
           </p>
         </div>
 
-        <form onSubmit={step === "phone" ? handlePhoneSubmit : handleVerifyOtp} className="flex flex-col gap-4 animate-slide-in-down">
-          {step === "phone" && (
-            <div className="space-y-4 animate-fade-in">
-              {isSignUp && (
-                <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1.5">Farmer name</label>
-                  <input
-                    type="text"
-                    value={farmerName}
-                    onChange={(e) => setFarmerName(e.target.value)}
-                    placeholder="Your full name"
-                    className="glass-input"
-                    maxLength={50}
-                  />
-                </div>
-              )}
+        <form className="flex flex-col gap-4 animate-slide-in-down">
+          <div className="space-y-4 animate-fade-in">
+            {isSignUp && (
               <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1.5">Mobile number</label>
-                <div className="flex items-center gap-2">
-                  <span className="text-gray-600 font-medium">+91</span>
-                  <input
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
-                    placeholder="10-digit number"
-                    className="glass-input flex-1"
-                    maxLength={10}
-                    inputMode="numeric"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {step === "otp" && (
-            <div className="space-y-4 animate-fade-in">
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1.5">Enter OTP</label>
-                <p className="text-xs text-gray-500 mb-2">Sent to +91{phone}</p>
+                <label className="block text-xs font-semibold text-gray-700 mb-1.5">Farmer name</label>
                 <input
                   type="text"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                  placeholder="6-digit OTP"
+                  value={farmerName}
+                  onChange={(e) => setFarmerName(e.target.value)}
+                  placeholder="Your full name"
                   className="glass-input"
-                  maxLength={6}
-                  inputMode="numeric"
-                  autoFocus
+                  maxLength={50}
                 />
               </div>
-              <button
-                type="button"
-                onClick={() => resetForm()}
-                className="text-xs text-emerald-600 hover:text-emerald-700 font-medium"
-              >
-                Didn't receive OTP? Go back
-              </button>
-            </div>
-          )}
+            )}
+          </div>
 
           {error && (
             <div className="p-3 rounded-xl bg-red-50 border border-red-200">
@@ -228,16 +112,7 @@ export default function LoginScreen({ onBack }: { onBack?: () => void }) {
           )}
 
           {isFirebaseConfigured && (
-            <div className="space-y-3">
-              <div id="recaptcha-container" className="flex justify-center" />
-              <button
-                type="submit"
-                disabled={loading || (step === "phone" && !phone.trim()) || (step === "otp" && !otp.trim())}
-                className="w-full py-3 rounded-xl text-sm font-semibold bg-gradient-to-r from-emerald-500 to-green-600 text-white shadow-md border border-green-300 disabled:opacity-60 hover:shadow-lg active:scale-[0.98] transition-all"
-              >
-                {loading ? (step === "phone" ? "Sending OTP..." : "Verifying...") : step === "phone" ? "Send OTP" : "Verify OTP"}
-              </button>
-            </div>
+            <p className="text-xs text-gray-600 text-center">OTP login is removed in v2.0. Use Google sign-in.</p>
           )}
         </form>
 
@@ -280,7 +155,7 @@ export default function LoginScreen({ onBack }: { onBack?: () => void }) {
             </svg>
             {isSignUp ? "Sign up with Google" : "Continue with Google"}
           </button>
-          <p className="text-center text-gray-500 text-xs mt-4">Secure login. Your data is encrypted.</p>
+          <p className="text-center text-gray-500 text-xs mt-4">Secure login with Google. OTP is disabled in v2.0.</p>
         </div>
 
         <div className="mt-6 text-center">

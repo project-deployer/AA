@@ -1,6 +1,6 @@
-"""Rule-based chatbot for MVP. Farmer-friendly responses."""
+"""Rule-based chatbot with recommendation-aware responses for v2.0."""
 import re
-from typing import Optional
+from typing import Optional, List, Dict, Any
 
 
 KEYWORDS_RESPONSES = [
@@ -16,7 +16,22 @@ KEYWORDS_RESPONSES = [
 ]
 
 
-def get_response(user_message: str, crop_name: str = "") -> str:
+def _best_profit_crop(recommendations: List[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+    if not recommendations:
+        return None
+    return max(recommendations, key=lambda item: item.get("estimated_profit_max", 0))
+
+
+def _least_water_crop(recommendations: List[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+    if not recommendations:
+        return None
+    low_risk = [r for r in recommendations if r.get("risk_score") == "Low"]
+    if low_risk:
+        return max(low_risk, key=lambda item: item.get("suitability_score", 0))
+    return min(recommendations, key=lambda item: item.get("estimated_investment_cost", 0))
+
+
+def get_response(user_message: str, crop_name: str = "", recommendations: Optional[List[Dict[str, Any]]] = None) -> str:
     """Return rule-based response for user message."""
     text = (user_message or "").strip().lower()
     if not text:
@@ -25,6 +40,34 @@ def get_response(user_message: str, crop_name: str = "") -> str:
     for pattern, response in KEYWORDS_RESPONSES:
         if re.search(pattern, text, re.IGNORECASE):
             return response
+
+    recommendations = recommendations or []
+    if "best crop" in text or "which crop is best" in text:
+        if recommendations:
+            top = recommendations[0]
+            return (
+                f"Best crop for your current inputs is {top['crop_name']} with suitability score "
+                f"{top['suitability_score']}/100 and risk {top['risk_score']}."
+            )
+        return "For your field, I recommend checking crop score from the right panel recommendations."
+
+    if "high profit" in text or "which crop gives high profit" in text:
+        best = _best_profit_crop(recommendations)
+        if best:
+            return (
+                f"Highest profit option is {best['crop_name']} with estimated profit range ₹{best['estimated_profit_min']:,}"
+                f" to ₹{best['estimated_profit_max']:,}."
+            )
+        return "High-profit crop depends on your weather and soil; run recommendation for exact numbers."
+
+    if "less water" in text or "needs less water" in text:
+        least = _least_water_crop(recommendations)
+        if least:
+            return (
+                f"For lower water requirement, prefer {least['crop_name']} with suitability "
+                f"{least['suitability_score']}/100."
+            )
+        return "Millet, pulses, and chickpea usually need less water than paddy/sugarcane."
 
     if any(w in text for w in ["?", "how", "what", "when", "why"]):
         return (

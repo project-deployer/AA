@@ -1,7 +1,7 @@
 import { useState } from "react";
 import ChatMessages from "./chat/ChatMessages";
 import ChatInput from "./chat/ChatInput";
-import { getCropImageUrl } from "../../utils/cropImages";
+import { getCropImageUrl, getCropEmoji } from "../../utils/cropImages";
 
 interface Props {
   fieldId: number | null;
@@ -11,28 +11,37 @@ interface Props {
 
 export default function CenterPanel({ fieldId, cropName, fieldName }: Props) {
   const [chatRefreshKey, setChatRefreshKey] = useState(0);
+  const [imageLoaded, setImageLoaded] = useState(false);
   const handleChatSent = () => {
     setChatRefreshKey((k) => k + 1);
     // ChatMessages handles auto-scrolling itself
   };
 
   return (
-    <main className="flex-1 flex flex-col min-w-0 glass-panel-light border-r border-gray-200">
-      <div className="flex-1 flex flex-col overflow-hidden min-h-0">
+    <main className="flex-1 flex flex-col min-w-0 h-full glass-panel-light border-r border-gray-200 overflow-hidden">
+      <div className="flex flex-col h-full min-h-0 overflow-hidden">
         {fieldId ? (
           <>
             <div className="flex-shrink-0 px-5 py-4 border-b border-gray-200 glass-panel-light flex items-center gap-4">
-              <img
-                src={getCropImageUrl(cropName)}
-                alt={cropName}
-                className="w-12 h-12 rounded-xl object-cover ring-2 ring-green-200"
-              />
+              {imageLoaded ? (
+                <img
+                  src={getCropImageUrl(cropName)}
+                  alt={cropName}
+                  onLoad={() => setImageLoaded(true)}
+                  onError={() => setImageLoaded(false)}
+                  className="w-12 h-12 rounded-xl object-cover ring-2 ring-green-200"
+                />
+              ) : (
+                <div className="w-12 h-12 rounded-xl ring-2 ring-green-200 bg-gradient-to-br from-emerald-100 to-green-100 flex items-center justify-center">
+                  <span className="text-lg">{getCropEmoji(cropName)}</span>
+                </div>
+              )}
               <div>
                 <h2 className="font-display font-bold text-lg text-gray-900">{fieldName || "My Field"}</h2>
                 <p className="text-gray-600 text-sm">Ask anything about your {cropName || "crop"}</p>
               </div>
             </div>
-            <div className="flex-1 flex flex-col overflow-hidden min-h-0">
+            <div className="flex-1 min-h-0 overflow-hidden">
               <ChatMessages fieldId={fieldId} refreshKey={chatRefreshKey} />
             </div>
             <div className="flex-shrink-0 p-4 border-t border-gray-200 bg-white/80 safe-area-bottom">

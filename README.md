@@ -1,6 +1,17 @@
-# AgriAI - Smart Agriculture Assistant
+# AgriAI v2.0 - AI Crop Recommendation Engine with Weather + Smart Chatbot
 
-AgriAI is a smart agriculture assistant for Indian farmers that provides scientific crop planning, day-to-day guidance, and AI-style conversational support.
+AgriAI is an AI-powered agriculture assistant for Indian farmers that automatically recommends the best crops based on soil, weather, season, and budget, then provides day-to-day guidance and smart chatbot support.
+
+## What's New in v2.0
+
+- **AI Crop Recommendation**: System automatically recommends top 3 crops based on soil, season, weather, water availability, and budget
+- **Weather Integration**: Live weather data with rainfall forecasting for crop suitability scoring
+- **Crop Suitability Scoring**: Each recommendation includes score (0-100), risk level, yield estimate, and profit range
+- **Smart Chatbot Upgrade**: Intent-based responses using recommendation context
+- **Enhanced Dashboard**: Profit comparison charts, weather widget, recommendation history
+- **No OTP Login**: Simplified Google sign-in + dev mode for development
+- **New API Endpoints**: `/api/recommend`, `/api/recommend/history`, `/api/weather/{location}`, `/api/crops/{id}/score`
+- **New Database Tables**: `weather_logs`, `crop_recommendations`, `soil_crop_matrix`
 
 ## Quick Start
 
@@ -23,6 +34,15 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 Set `ENV=development` in `.env` for dev-mode auth (use "Continue (Dev)" on login).
+
+### Optional: Weather API
+
+For live weather, set `WEATHER_API_KEY` in `backend/.env`:
+```bash
+WEATHER_API_KEY=your_openweathermap_api_key
+```
+Get an API key: [OpenWeather](https://openweathermap.org/api)
+Without API key, system uses fallback weather data.
 
 ### Frontend
 
@@ -63,8 +83,11 @@ See `docs/ARCHITECTURE.md` for full system design.
 
 ## Features
 
-- Launch: Logo animation → Feature overview → Login
+- Launch: Logo animation → Feature overview → Login (Google + Dev)
 - Dashboard: 3-panel layout (Crops, Chat, Plan)
-- Add Crop: Land, soil, crop, water, investment
-- AI Chat: Rule-based farmer-friendly responses
-- My Plan: Weather, cost, yield, day-to-day actions
+- Add Crop: Land, soil, season, location, water, investment → AI auto-recommends crop
+- AI Crop Recommendation: Top 3 crops with suitability scores, yields, and profit estimates
+- Weather Integration: Live temperature, rainfall, condition per location
+- Chat: Rule-based farmer-friendly responses with recommendation context
+- My Plan: Weather widget, crop score, profit chart, day-to-day tasks
+- Recommendation History: Track all past recommendations per field

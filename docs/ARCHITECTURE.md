@@ -1,6 +1,6 @@
-# AgriAI System Architecture
+# AgriAI v2.0 System Architecture
 
-## 1. High-Level System Architecture
+## 1. High-Level System Architecture (v2.0)
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -8,32 +8,41 @@
 ├─────────────┬───────────────────────────────────┬───────────────────────────┤
 │  Left Panel │     Center Panel (AI Chat)        │   Right Panel (My Plan)   │
 │  - Crops    │     - ChatGPT-style interface     │   - Weather, Progress     │
-│  - Fields   │     - Message bubbles             │   - Cost, Yield, Profit   │
-│  - Nav      │     - Fixed input bar             │   - Day-to-day plan       │
+│  - Fields   │     - Message bubbles             │   - Recommendation List   │
+│  - Nav      │     - Fixed input bar             │   - Profit Chart          │
+│  - Add: AI  │                                   │   - Crop Score & Risk     │
+│    recommen │                                   │   - Day-to-day plan       │
 └─────────────┴───────────────────────────────────┴───────────────────────────┘
                                     │
                                     │ HTTPS / REST API
                                     ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                        BACKEND (FastAPI)                                     │
-├──────────────┬──────────────┬──────────────┬──────────────┬─────────────────┤
-│   auth.py    │  database.py │  models.py   │ crop_rules.py│ chatbot_rules.py│
-│ Firebase     │  SQLite      │  ORM models  │ Planning     │ Rule-based      │
-│ verification │  Session     │  FarmerProfile│ engine      │ Q&A engine      │
-│              │  handling    │  Field, Crop │              │                 │
-└──────────────┴──────────────┴──────────────┴──────────────┴─────────────────┘
+│                        BACKEND (FastAPI v2.0)                                │
+├──────────┬──────────┬──────────┬───────────────┬──────────────┬─────────────┤
+│  auth.py │ database │ models.py│ recommendation│crop_rules.py │ chatbot.py  │
+│Firebase  │ SQLite   │ ORM:     │ _engine.py:   │Planning      │ Context-    │
+│verify    │ Session  │- Farmer  │- ML-style     │ engine       │ aware       │
+│          │ handling │- Field   │  scoring      │              │ responses   │
+│          │          │- Chat    │- Weather API  │              │             │
+│          │          │- Weather │- Soil-crop    │              │             │
+│          │          │- Rec     │  matrix       │              │             │
+└──────────┴──────────┴──────────┴───────────────┴──────────────┴─────────────┘
                                     │
                                     ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                        SQLite Database                                       │
-│  farmer_profiles, fields, crop_plans, chat_messages                          │
+│                        SQLite Database (v2.0)                               │
+│  farmer_profiles, fields, chat_messages                                      │
+│  + weather_logs, crop_recommendations, soil_crop_matrix                      │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-**Why this architecture:**
-- **3-panel layout**: Familiar ChatGPT-style UX; left for context, center for interaction, right for actionable plan. Separates "what I have" from "what I'm doing" from "what to do next."
-- **FastAPI + SQLite**: Fast iteration for MVP; SQLite is file-based (no infra), sufficient for single-instance deployment.
-- **Rule-based MVP**: Deterministic, debuggable, no API costs. Easily swappable for LLM later.
+**Key v2.0 Improvements:**
+- **ML-style Crop Recommendation**: No manual crop selection. Users provide soil, season, location, water, budget → system recommends top 3 crops with suitability scores.
+- **Weather Integration**: Real-time weather API + rainfall data for crop suitability scoring.
+- **Crop Scoring**: Each crop gets 0-100 suitability score, risk assessment, yield estimate, and profit range.
+- **Smart Chatbot**: Responds contextually to questions about recommended crops, best profit options, water requirements.
+- **Recommendation History**: Tracks all past recommendations per farmer and field.
+- **No OTP Login**: Simplified to Google Sign-In + dev mode only.
 
 ---
 
@@ -116,34 +125,46 @@ AA/
 
 ---
 
-## 5. API Design
+## 5. API Design (v2.0)
 
 | Method | Endpoint | Purpose |
 |--------|----------|---------|
 | POST | `/api/auth/verify` | Verify Firebase token, return session |
-| POST | `/api/auth/refresh` | Refresh session |
 | GET | /api/crops | List crops for user |
-| POST | /api/crops | Create crop/field |
+| POST | /api/crops | Create crop (auto-recommend if no crop_name) |
 | PUT | /api/crops/{id} | Update crop |
 | DELETE | /api/crops/{id} | Delete crop |
 | GET | /api/crops/{id}/plan | Get generated plan |
-| POST | /api/chat | Send message, get AI response |
+| GET | /api/crops/{id}/score | Get crop suitability score |
+| POST | /api/chat | Send message, get AI response (with recommendation context) |
 | GET | /api/chat/{crop_id}/history | Get chat history |
-| GET | /api/plan/{crop_id} | Get plan (weather placeholder) |
+| GET | /api/plan/{crop_id} | Get plan with weather |
+| **POST** | **/api/recommend** | Generate AI crop recommendations for given inputs |
+| **GET** | **/api/recommend/history** | Get recommendation history (with optional field_id filter) |
+| **GET** | **/api/weather/{location}** | Get live weather for location |
 
 ---
 
-## 6. Data Flow
+## 6. Data Flow (v2.0)
 
 ```
-User adds crop → POST /api/crops → crop_rules.generate_plan()
-  → Plan stored → Plan returned → Right panel updates
+User provides field inputs (soil, season, location, water, budget)
+  → POST /api/crops (no explicit crop_name)
+  → Backend: generate_recommendations() + fetch_weather()
+  → AI picks top crop, creates field with plan
+  → Field stored + Recommendation logged to DB
+  
+Farmer views My Plan
+  → GET /api/crops/{id}/plan
+  → GET /api/crops/{id}/score
+  → GET /api/recommend/history?field_id={id}
+  → Right panel shows: weather, score, recommendations list, profit chart
 
-User sends chat → POST /api/chat → chatbot_rules.get_response()
-  → Response stored → Message returned → Center panel updates
-
-Auth: Firebase ID token → Backend verifies → firebase_uid → FarmerProfile
-  → Session/cookie for subsequent requests
+Farmer asks chat question
+  → POST /api/chat
+  → Backend loads latest recommendation from DB
+  → get_response() with recommendation context
+  → Smart reply about best crop, profit, water needs, etc.
 ```
 
 ---
@@ -165,24 +186,39 @@ Auth: Firebase ID token → Backend verifies → firebase_uid → FarmerProfile
 
 | File | Purpose |
 |------|---------|
-| `main.py` | Entry point, CORS, lifespan, router registration |
-| `config.py` | Pydantic settings (DB, Firebase, CORS) |
+| `main.py` | Entry point, CORS, lifespan, router registration (v2.0: added recommend router) |
+| `config.py` | Pydantic settings (DB, Firebase, CORS, weather_api_key) |
 | `database.py` | SQLAlchemy engine, SessionLocal, Base |
-| `models.py` | FarmerProfile, Field, ChatMessage |
-| `schemas.py` | Pydantic request/response schemas |
+| `models.py` | ORM: FarmerProfile, Field, ChatMessage, **WeatherLog, CropRecommendation, SoilCropMatrix** |
+| `schemas.py` | Pydantic: Request/response (v2.0: added Recommendation, Weather, SoilCropMatrix schemas) |
 | `auth.py` | Firebase verify, dev token bypass, get_current_user |
 | `crop_rules.py` | Rule-based plan generation (duration, cost, yield, fertilizers, irrigation, day plan) |
-| `chatbot_rules.py` | Keyword-based Hindi/English responses |
-| `routers/*` | auth, crops, chat, plan endpoints |
+| `**recommendation_engine.py**` | **(NEW)** ML-style scoring: weather API, soil-crop matrix, seasonality, water & investment adjustments |
+| `chatbot_rules.py` | Keyword-based responses (v2.0: context-aware with recommendation data) |
+| `routers/auth.py` | Auth verify endpoint |
+| `routers/crops.py` | CRUD crops + auto-recommend on create, crop score endpoint |
+| `routers/chat.py` | Chat endpoint (v2.0: passes recommendation context) |
+| `routers/plan.py` | Plan retrieval endpoint |
+| `**routers/recommend.py**` | **(NEW)** POST /recommend, GET /recommend/history, GET /weather/{location} |
 
 ### Frontend (React + Vite)
 
 | Area | Components |
 |------|------------|
-| Launch | LogoIntro (fade+scale), FeatureOverview (swipeable cards), LoginScreen (OTP/Google placeholder, Dev login) |
-| Dashboard | LeftPanel (crops list, add/delete), CenterPanel (ChatMessages, ChatInput), RightPanel (weather, progress, plan) |
-| Add Crop | AddCropModal (land, soil, crop search, water, investment) |
+| Launch | LogoIntro (fade+scale), FeatureOverview (swipeable cards), LoginScreen (Google + Dev, **no OTP**) |
+| Dashboard | LeftPanel (crops list, add/delete), CenterPanel (ChatMessages, ChatInput), RightPanel (**Recommendation list, profit chart, weather, crop score**) |
+| Add Crop | **AddCropModal (soil, season, location, water, investment → AI recommends)** |
 | Mobile | MobileBottomNav (Chat/Plan tabs), collapsible left drawer |
+
+### v2.0 Additions
+
+| Component | Details |
+|-----------|---------|
+| **Recommendation Card** | Displays top crop selection, all inputs, and weather used for decision |
+| **Suitability Score** | 0-100 score + risk badge (Low/Medium/High) |
+| **Profit Comparison** | Horizontal bar chart comparing profit range of top 3 crops |
+| **Weather Widget** | Live temperature, rainfall, condition + location tag |
+| **Recommendation History** | List of past recommendations for the field |
 
 ### Why Key Decisions
 

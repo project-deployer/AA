@@ -21,7 +21,9 @@ class FieldCreate(BaseModel):
     name: str = "My Field"
     land_area_acres: float = Field(..., gt=0, le=1000)
     soil_type: str = Field(..., min_length=1, max_length=50)
-    crop_name: str = Field(..., min_length=1, max_length=100)
+    crop_name: Optional[str] = Field(None, min_length=1, max_length=100)
+    location: str = Field("Hyderabad", min_length=2, max_length=255)
+    season: str = Field("kharif", pattern="^(kharif|rabi|zaid)$")
     water_availability: str = Field(..., pattern="^(low|medium|high)$")
     investment_level: str = Field(..., pattern="^(low|medium|high)$")
 
@@ -102,3 +104,54 @@ class PlanResponse(BaseModel):
     current_time: str
     duration_progress: float
     plan: CropPlan
+
+
+class WeatherResponse(BaseModel):
+    location: str
+    temperature_c: float
+    rainfall_mm: float
+    condition: str
+    source: str
+
+
+class CropRecommendationItem(BaseModel):
+    crop_name: str
+    suitability_score: int
+    risk_score: str
+    expected_yield_estimation: str
+    estimated_investment_cost: int
+    estimated_profit_min: int
+    estimated_profit_max: int
+
+
+class RecommendRequest(BaseModel):
+    soil_type: str = Field(..., min_length=1, max_length=50)
+    area_acres: float = Field(..., gt=0, le=1000)
+    location: str = Field(..., min_length=2, max_length=255)
+    season: str = Field(..., pattern="^(kharif|rabi|zaid)$")
+    water_availability: str = Field(..., pattern="^(low|medium|high)$")
+    investment_level: str = Field(..., pattern="^(low|medium|high)$")
+    field_id: Optional[int] = None
+
+
+class RecommendResponse(BaseModel):
+    recommendation_id: int
+    weather: WeatherResponse
+    recommendations: List[CropRecommendationItem]
+
+
+class RecommendationHistoryItem(BaseModel):
+    id: int
+    field_id: Optional[int]
+    soil_type: str
+    area_acres: float
+    location: str
+    season: str
+    water_availability: str
+    investment_level: str
+    weather: Optional[WeatherResponse]
+    recommendations: List[CropRecommendationItem]
+    created_at: datetime
+
+    class Config:
+        from_attributes = True

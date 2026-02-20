@@ -54,8 +54,8 @@ export default function Dashboard() {
   const selectedCrop = crops.find((c) => c.id === selectedId);
 
   return (
-    <div className="h-screen min-h-[100dvh] flex flex-col lg:flex-row overflow-hidden relative bg-gradient-to-br from-blue-50 via-green-50 to-emerald-50">
-      <div className="relative z-10 flex flex-1 flex-col lg:flex-row min-w-0 min-h-0">
+    <div className="h-screen flex flex-col lg:flex-row overflow-hidden relative bg-gradient-to-br from-blue-50 via-green-50 to-emerald-50">
+      <div className="relative z-10 flex flex-1 flex-col lg:flex-row min-w-0 min-h-0 overflow-hidden">
       <LeftPanel
         crops={crops}
         selectedId={selectedId}
@@ -69,11 +69,11 @@ export default function Dashboard() {
         <header className="flex-shrink-0 flex items-center justify-end px-4 py-3 lg:px-6 border-b border-gray-200 glass-panel-light">
           <UserProfile onOpenSettings={() => setSettingsOpen(true)} />
         </header>
-        <div className="flex-1 flex min-w-0 overflow-hidden">
-          <div className={`flex-1 min-h-0 min-w-0 flex flex-col ${mobileTab === "plan" ? "hidden lg:flex" : "flex"}`}>
+        <div className="flex-1 flex min-w-0 min-h-0 overflow-hidden">
+          <div className={`flex-1 min-h-0 min-w-0 flex flex-col overflow-hidden ${mobileTab === "plan" ? "hidden lg:flex" : "flex"}`}>
             <CenterPanel fieldId={selectedId} cropName={selectedCrop?.crop_name ?? ""} fieldName={selectedCrop?.name} />
           </div>
-          <div className={`flex-1 min-h-0 min-w-0 lg:max-w-[360px] ${mobileTab === "chat" ? "hidden lg:flex" : "flex"}`}>
+          <div className={`flex-1 min-h-0 min-w-0 lg:max-w-[360px] overflow-hidden ${mobileTab === "chat" ? "hidden lg:flex" : "flex"}`}>
             <RightPanel fieldId={selectedId} crop={selectedCrop} />
           </div>
         </div>

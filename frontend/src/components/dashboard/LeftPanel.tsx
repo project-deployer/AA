@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { api, Crop } from "../../api/client";
-import { getCropImageUrl } from "../../utils/cropImages";
+import { getCropImageUrl, getCropEmoji } from "../../utils/cropImages";
 
 interface Props {
   crops: Crop[];
@@ -13,10 +13,15 @@ interface Props {
   loading: boolean;
 }
 
+interface CropCardState {
+  [key: number]: boolean; // imageLoaded state per crop
+}
+
 export default function LeftPanel({ crops, selectedId, onSelect, onAdd, onDeleted, onOpenSettings, loading }: Props) {
   const { token } = useAuth();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [imageLoaded, setImageLoaded] = useState<CropCardState>({})
 
   const handleDelete = async (e: React.MouseEvent, id: number) => {
     e.stopPropagation();
@@ -94,11 +99,19 @@ export default function LeftPanel({ crops, selectedId, onSelect, onAdd, onDelete
                         : "glass-card border-gray-200 hover:border-gray-300"}
                     `}
                   >
-                    <img
-                      src={getCropImageUrl(c.crop_name)}
-                      alt={c.crop_name}
-                      className="w-12 h-12 rounded-xl object-cover flex-shrink-0 ring-2 ring-green-200"
-                    />
+                    {imageLoaded[c.id] ? (
+                      <img
+                        src={getCropImageUrl(c.crop_name)}
+                        alt={c.crop_name}
+                        onLoad={() => setImageLoaded((s) => ({ ...s, [c.id]: true }))}
+                        onError={() => setImageLoaded((s) => ({ ...s, [c.id]: false }))}
+                        className="w-12 h-12 rounded-xl object-cover flex-shrink-0 ring-2 ring-green-200"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 rounded-xl flex-shrink-0 ring-2 ring-green-200 bg-gradient-to-br from-emerald-100 to-green-100 flex items-center justify-center">
+                        <span className="text-lg">{getCropEmoji(c.crop_name)}</span>
+                      </div>
+                    )}
                     <div className="min-w-0 flex-1">
                       <p className="font-bold text-gray-900 truncate">{c.name || c.crop_name}</p>
                       <p className="text-xs text-gray-600 truncate">{c.crop_name} · {c.land_area_acres} acre</p>

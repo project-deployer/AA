@@ -35,25 +35,31 @@ export default function ChatMessages({ fieldId, refreshKey = 0, onNewMessage }: 
   return (
     <>
       <style>{`
+        .chat-messages-container {
+          scrollbar-width: thin;
+          scrollbar-color: #10b981 #f3f4f6;
+        }
         .chat-messages-container::-webkit-scrollbar {
-          width: 10px;
+          width: 8px;
         }
         .chat-messages-container::-webkit-scrollbar-track {
-          background: #f3f4f6;
-          border-radius: 10px;
+          background: transparent;
         }
         .chat-messages-container::-webkit-scrollbar-thumb {
           background: #10b981;
-          border-radius: 10px;
+          border-radius: 4px;
+          border: 2px solid transparent;
+          background-clip: content-box;
         }
         .chat-messages-container::-webkit-scrollbar-thumb:hover {
           background: #059669;
+          background-clip: content-box;
         }
       `}</style>
-      <div className="flex flex-col h-full">
+      <div className="h-full flex flex-col min-h-0 overflow-hidden">
         <div
-          className="flex-1 overflow-y-auto px-4 py-4 space-y-4 chat-messages-container"
-          style={{ scrollbarWidth: "auto", scrollbarColor: "#10b981 #f3f4f6" }}
+          className="flex-1 overflow-y-auto overflow-x-hidden px-4 py-4 space-y-4 chat-messages-container"
+          style={{ minHeight: 0 }}
         >
           {loading ? (
             <div className="text-center py-12 text-gray-600 font-medium">Loading...</div>
@@ -70,13 +76,13 @@ export default function ChatMessages({ fieldId, refreshKey = 0, onNewMessage }: 
               >
                 <div
                   className={`
-                    max-w-[85%] rounded-2xl px-5 py-3
+                    max-w-[85%] rounded-2xl px-5 py-3 break-words
                     ${m.role === "user"
                       ? "bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-br-md shadow-md hover:shadow-lg transition-all duration-300"
                       : "glass-card border-gray-200 text-gray-800 rounded-bl-md hover:border-white/60 transition-all duration-300"}
                   `}
                 >
-                  <p className="text-sm font-medium whitespace-pre-wrap">{m.content}</p>
+                  <p className="text-sm font-medium whitespace-pre-wrap break-words">{m.content}</p>
                 </div>
               </div>
             ))
