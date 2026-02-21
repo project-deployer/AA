@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { api, Crop, CropRecommendationItem, PlanResponse, RecommendationHistoryItem, WeatherResponse } from "../../api/client";
 import { getCropImageUrl, getCropEmoji } from "../../utils/cropImages";
@@ -20,13 +20,16 @@ export default function RightPanel({ fieldId, crop }: Props) {
   const [plan, setPlan] = useState<PlanResponse | null>(null);
   const [recommendations, setRecommendations] = useState<CropRecommendationItem[]>([]);
   const [selectedPlanCrop, setSelectedPlanCrop] = useState<string>(crop?.crop_name ?? "");
+  const [selectedPlanMonth, setSelectedPlanMonth] = useState<number>(1);
   const [weather, setWeather] = useState<WeatherResponse | null>(null);
   const [cropScore, setCropScore] = useState<CropRecommendationItem | null>(null);
   const [loading, setLoading] = useState(false);
   const [cropImageLoaded, setCropImageLoaded] = useState(false);
+  const dayCardRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   useEffect(() => {
     setSelectedPlanCrop(crop?.crop_name ?? "");
+    setSelectedPlanMonth(1);
   }, [fieldId, crop?.crop_name]);
 
   const planCropOptions = Array.from(
@@ -35,6 +38,44 @@ export default function RightPanel({ fieldId, crop }: Props) {
         .filter((name): name is string => Boolean(name && name.trim()))
     )
   );
+
+  const activeMonthlyPlan = plan?.plan.monthly_plans?.find((m) => m.month_number === selectedPlanMonth)
+    || plan?.plan.monthly_plans?.[0];
+
+  const activeDayPlan = activeMonthlyPlan?.day_plan || plan?.plan.day_plan || [];
+
+  const parseDayDate = (value: string): Date | null => {
+    const parts = value.split("/");
+    if (parts.length !== 3) return null;
+    const day = Number(parts[0]);
+    const month = Number(parts[1]);
+    const year = Number(parts[2]);
+    if (!day || !month || !year) return null;
+    const parsed = new Date(year, month - 1, day);
+    if (Number.isNaN(parsed.getTime())) return null;
+    return parsed;
+  };
+
+  const findTodayInActiveMonth = () => {
+    const today = new Date();
+    return activeDayPlan.find((item) => {
+      const parsed = parseDayDate(item.date);
+      return (
+        parsed
+        && parsed.getFullYear() === today.getFullYear()
+        && parsed.getMonth() === today.getMonth()
+        && parsed.getDate() === today.getDate()
+      );
+    });
+  };
+
+  const todayInActiveMonth = findTodayInActiveMonth();
+
+  const jumpToToday = () => {
+    if (!activeMonthlyPlan || !todayInActiveMonth) return;
+    const key = `${activeMonthlyPlan.month_number}-${todayInActiveMonth.day}`;
+    dayCardRefs.current[key]?.scrollIntoView({ behavior: "smooth", block: "center" });
+  };
 
   useEffect(() => {
     if (!fieldId || !token) {
@@ -161,6 +202,7 @@ export default function RightPanel({ fieldId, crop }: Props) {
             </select>
           </div>
         )}
+
         {loading ? (
           <div className="text-center py-16 text-gray-600 font-medium">Loading plan...</div>
         ) : !plan ? (
@@ -284,19 +326,92 @@ export default function RightPanel({ fieldId, crop }: Props) {
 
             <div>
               <h3 className="font-display font-bold text-gray-900 mb-3">Day-to-day Plan</h3>
+              {plan.plan.monthly_plans?.length > 0 && (
+                <>
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {plan.plan.monthly_plans.map((m) => {
+                      const selected = m.month_number === (activeMonthlyPlan?.month_number || selectedPlanMonth);
+                      return (
+                        <button
+                          key={m.month_number}
+                          type="button"
+                          onClick={() => setSelectedPlanMonth(m.month_number)}
+                          className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition ${
+                            selected
+                              ? "bg-emerald-600 text-white border-emerald-600"
+                              : "bg-white/70 text-gray-700 border-gray-300 hover:border-emerald-400"
+                          }`}
+                        >
+                          {m.month_label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <p className="text-xs text-gray-600 mb-2">
+                    {activeMonthlyPlan?.focus || "Monthly crop work plan"}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={jumpToToday}
+                    disabled={!todayInActiveMonth}
+                    className={`mb-2 px-3 py-1.5 rounded-full text-xs font-semibold border transition ${
+                      todayInActiveMonth
+                        ? "bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700"
+                        : "bg-gray-200 text-gray-500 border-gray-300 cursor-not-allowed"
+                    }`}
+                  >
+                    Today
+                  </button>
+                </>
+              )}
               <div className="space-y-2">
-                {plan.plan.day_plan?.slice(0, 10).map((d) => (
+                {activeDayPlan.map((d) => (
+                  (() => {
+                    const cardMonth = activeMonthlyPlan?.month_number || 1;
+                    const cardKey = `${cardMonth}-${d.day}`;
+                    const parsed = parseDayDate(d.date);
+                    const today = new Date();
+                    const isToday = Boolean(
+                      parsed
+                      && parsed.getFullYear() === today.getFullYear()
+                      && parsed.getMonth() === today.getMonth()
+                      && parsed.getDate() === today.getDate()
+                    );
+
+                    return (
                   <div
-                    key={d.day}
-                    className="flex gap-4 p-4 rounded-2xl glass-card border-gray-200"
+                    key={cardKey}
+                    ref={(el) => {
+                      dayCardRefs.current[cardKey] = el;
+                    }}
+                    className={`flex gap-4 p-4 rounded-2xl glass-card items-start ${isToday ? "border-emerald-500 bg-emerald-50/70" : "border-gray-200"}`}
                   >
                     <span className="text-2xl">{ICONS[d.icon] || "📌"}</span>
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
                       <p className="font-bold text-sm text-gray-900">{d.title}</p>
                       <p className="text-xs text-gray-600">{d.date}</p>
                       <p className="text-xs text-gray-700 mt-1">{d.description}</p>
                     </div>
+                    <div className="w-20 h-16 rounded-lg overflow-hidden border border-gray-200 bg-gray-100 flex-shrink-0">
+                      {d.image_url ? (
+                        <img
+                          src={d.image_url}
+                          alt={d.title}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                          onError={(event) => {
+                            const target = event.currentTarget;
+                            const seed = encodeURIComponent(d.title || "crop");
+                            target.src = `https://picsum.photos/seed/${seed}/320/180`;
+                          }}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-lg">{ICONS[d.icon] || "🌾"}</div>
+                      )}
+                    </div>
                   </div>
+                    );
+                  })()
                 ))}
               </div>
             </div>

@@ -43,6 +43,14 @@ class DayPlanItem(BaseModel):
     title: str
     description: str
     icon: str
+    image_url: Optional[str] = None
+
+
+class MonthlyPlanItem(BaseModel):
+    month_number: int
+    month_label: str
+    focus: str
+    day_plan: List[DayPlanItem]
 
 
 class CropPlan(BaseModel):
@@ -53,6 +61,7 @@ class CropPlan(BaseModel):
     estimated_profit: float
     fertilizer_recommendations: List[str]
     irrigation_guidance: str
+    monthly_plans: List[MonthlyPlanItem] = []
     day_plan: List[DayPlanItem]
 
 

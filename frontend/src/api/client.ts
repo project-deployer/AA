@@ -71,8 +71,11 @@ export const api = {
       }),
   },
   plan: {
-    get: (token: string, fieldId: number, cropName?: string) => {
-      const query = cropName ? `?crop_name=${encodeURIComponent(cropName)}` : "";
+    get: (token: string, fieldId: number, cropName?: string, month?: number) => {
+      const params = new URLSearchParams();
+      if (cropName) params.set("crop_name", cropName);
+      if (month && month > 0) params.set("month", String(month));
+      const query = params.toString() ? `?${params.toString()}` : "";
       return request<PlanResponse>(`/plan/${fieldId}${query}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -115,6 +118,7 @@ export interface DayPlanItem {
   title: string;
   description: string;
   icon: string;
+  image_url?: string;
 }
 
 export interface CropPlan {
@@ -125,6 +129,14 @@ export interface CropPlan {
   estimated_profit: number;
   fertilizer_recommendations: string[];
   irrigation_guidance: string;
+  monthly_plans: MonthlyPlanItem[];
+  day_plan: DayPlanItem[];
+}
+
+export interface MonthlyPlanItem {
+  month_number: number;
+  month_label: string;
+  focus: string;
   day_plan: DayPlanItem[];
 }
 
