@@ -7,9 +7,12 @@ interface Props {
 export default function LaunchHeader({ onLoginClick, onBackClick, page = "overview" }: Props) {
   return (
     <header className="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-5 py-4 safe-area-top">
-      <span className="font-display font-extrabold text-xl bg-gradient-to-r from-emerald-600 via-green-600 to-teal-600 bg-clip-text text-transparent">
-        AgriAI
-      </span>
+      <div className="flex items-center gap-2">
+        <img src="/agriai-logo-updated.svg" alt="AgriAI" className="w-8 h-8 rounded-lg object-cover ring-1 ring-emerald-300" />
+        <span className="font-display font-extrabold text-xl bg-gradient-to-r from-emerald-600 via-green-600 to-teal-600 bg-clip-text text-transparent">
+          AgriAI
+        </span>
+      </div>
       {page === "overview" && (
         <button
           onClick={onLoginClick}

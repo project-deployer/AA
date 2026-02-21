@@ -1,0 +1,57 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="32" y1="32" x2="480" y2="480" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#DBF7C9"/>
+      <stop offset="1" stop-color="#0E5B2B"/>
+    </linearGradient>
+    <linearGradient id="leaf" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#91F06A"/>
+      <stop offset="1" stop-color="#116C33"/>
+    </linearGradient>
+    <linearGradient id="field" x1="64" y1="250" x2="448" y2="448" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#93D56A"/>
+      <stop offset="1" stop-color="#0A3D20"/>
+    </linearGradient>
+    <filter id="shadow" x="16" y="16" width="480" height="480" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="12" stdDeviation="12" flood-color="#0A3D20" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#shadow)">
+    <rect x="32" y="32" width="448" height="448" rx="88" fill="url(#bg)"/>
+    <rect x="34" y="34" width="444" height="444" rx="86" stroke="#8BD75E" stroke-width="4"/>
+  </g>
+
+  <path d="M64 334C125 291 196 275 256 284C323 294 389 327 448 384V432H64V334Z" fill="url(#field)"/>
+  <path d="M64 352C123 312 188 299 250 307C316 315 385 347 448 402" stroke="#A7E16E" stroke-width="7" stroke-linecap="round" opacity="0.75"/>
+  <path d="M64 382C132 340 202 332 266 341C328 350 389 372 448 410" stroke="#D2F597" stroke-width="6" stroke-linecap="round" opacity="0.65"/>
+
+  <circle cx="256" cy="154" r="40" fill="#F6D80A"/>
+  <path d="M256 92V62" stroke="#EAC800" stroke-width="7" stroke-linecap="round"/>
+  <path d="M225 102L211 76" stroke="#EAC800" stroke-width="7" stroke-linecap="round"/>
+  <path d="M287 102L301 76" stroke="#EAC800" stroke-width="7" stroke-linecap="round"/>
+  <path d="M208 121L184 106" stroke="#EAC800" stroke-width="7" stroke-linecap="round"/>
+  <path d="M304 121L328 106" stroke="#EAC800" stroke-width="7" stroke-linecap="round"/>
+
+  <path d="M250 308C250 279 252 252 256 226" stroke="#1A7A3E" stroke-width="14" stroke-linecap="round"/>
+  <path d="M256 234C208 220 170 186 152 143C198 142 242 164 270 198C271 211 265 225 256 234Z" fill="url(#leaf)"/>
+  <path d="M259 234C306 220 343 188 361 147C317 146 273 167 245 201C244 212 249 225 259 234Z" fill="url(#leaf)"/>
+  <path d="M171 154C197 157 223 170 248 190" stroke="#B9F98A" stroke-width="4" stroke-linecap="round"/>
+  <path d="M342 158C315 160 289 173 265 193" stroke="#B9F98A" stroke-width="4" stroke-linecap="round"/>
+
+  <g stroke="#2A7E3D" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M296 296L339 274"/>
+    <path d="M296 318H354"/>
+    <path d="M296 340L369 353"/>
+    <path d="M339 274V242"/>
+    <path d="M354 318V283"/>
+    <path d="M369 353V321"/>
+  </g>
+  <g fill="#A4ED64" stroke="#2A7E3D" stroke-width="6">
+    <circle cx="339" cy="242" r="11"/>
+    <circle cx="354" cy="283" r="11"/>
+    <circle cx="369" cy="321" r="11"/>
+  </g>
+
+  <text x="256" y="438" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="72" font-weight="700" fill="#C9F169">AgriAI</text>
+</svg>

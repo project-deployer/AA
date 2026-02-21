@@ -19,10 +19,22 @@ export default function RightPanel({ fieldId, crop }: Props) {
   const { token } = useAuth();
   const [plan, setPlan] = useState<PlanResponse | null>(null);
   const [recommendations, setRecommendations] = useState<CropRecommendationItem[]>([]);
+  const [selectedPlanCrop, setSelectedPlanCrop] = useState<string>(crop?.crop_name ?? "");
   const [weather, setWeather] = useState<WeatherResponse | null>(null);
   const [cropScore, setCropScore] = useState<CropRecommendationItem | null>(null);
   const [loading, setLoading] = useState(false);
   const [cropImageLoaded, setCropImageLoaded] = useState(false);
+
+  useEffect(() => {
+    setSelectedPlanCrop(crop?.crop_name ?? "");
+  }, [fieldId, crop?.crop_name]);
+
+  const planCropOptions = Array.from(
+    new Set(
+      [crop?.crop_name, ...recommendations.map((r) => r.crop_name)]
+        .filter((name): name is string => Boolean(name && name.trim()))
+    )
+  );
 
   useEffect(() => {
     if (!fieldId || !token) {
@@ -30,12 +42,13 @@ export default function RightPanel({ fieldId, crop }: Props) {
       return;
     }
     setLoading(true);
+    const cropNameForPlan = selectedPlanCrop || crop?.crop_name;
     api.plan
-      .get(token, fieldId)
+      .get(token, fieldId, cropNameForPlan)
       .then(setPlan)
       .catch(() => setPlan(null))
       .finally(() => setLoading(false));
-  }, [fieldId, token]);
+  }, [fieldId, token, selectedPlanCrop, crop?.crop_name]);
 
   useEffect(() => {
     if (!fieldId || !token) {
@@ -129,6 +142,25 @@ export default function RightPanel({ fieldId, crop }: Props) {
   return (
     <aside className="flex flex-col flex-1 min-h-0 glass-panel-light overflow-hidden border-l border-gray-200 dark:border-purple-400/20">
       <div className="flex-1 min-h-0 overflow-y-auto scrollbar-thin p-5 dark:text-gray-100">
+        {planCropOptions.length > 0 && (
+          <div className="mb-4 p-4 rounded-2xl glass-card border-gray-200">
+            <label htmlFor="plan-crop-select" className="block text-xs font-semibold text-gray-700 uppercase mb-2">
+              Crop Plan For
+            </label>
+            <select
+              id="plan-crop-select"
+              value={selectedPlanCrop}
+              onChange={(e) => setSelectedPlanCrop(e.target.value)}
+              className="w-full rounded-xl border border-gray-300 bg-white/80 px-3 py-2 text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400"
+            >
+              {planCropOptions.map((cropName) => (
+                <option key={cropName} value={cropName}>
+                  {cropName}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
         {loading ? (
           <div className="text-center py-16 text-gray-600 font-medium">Loading plan...</div>
         ) : !plan ? (

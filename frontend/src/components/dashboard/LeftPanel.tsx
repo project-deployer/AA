@@ -60,6 +60,7 @@ export default function LeftPanel({ crops, selectedId, onSelect, onAdd, onDelete
       >
         <div className="p-5 border-b border-gray-200">
           <div className="flex items-center gap-3">
+            <img src="/agriai-logo-updated.svg" alt="AgriAI" className="w-8 h-8 rounded-lg object-cover ring-1 ring-emerald-300" />
             <span className="font-display font-extrabold text-xl bg-gradient-to-r from-emerald-600 via-green-600 to-teal-600 bg-clip-text text-transparent">
               AgriAI
             </span>

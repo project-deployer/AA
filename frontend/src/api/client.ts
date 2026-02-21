@@ -71,10 +71,12 @@ export const api = {
       }),
   },
   plan: {
-    get: (token: string, fieldId: number) =>
-      request<PlanResponse>(`/plan/${fieldId}`, {
+    get: (token: string, fieldId: number, cropName?: string) => {
+      const query = cropName ? `?crop_name=${encodeURIComponent(cropName)}` : "";
+      return request<PlanResponse>(`/plan/${fieldId}${query}`, {
         headers: { Authorization: `Bearer ${token}` },
-      }),
+      });
+    },
   },
   recommend: {
     generate: (token: string, data: RecommendInput) =>

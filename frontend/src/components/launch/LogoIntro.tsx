@@ -7,7 +7,7 @@ export default function LogoIntro() {
           <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-emerald-500/20 to-green-500/20 blur-2xl scale-150 animate-pulse" />
             <div className="relative w-36 h-36 rounded-3xl bg-white/80 backdrop-blur-sm shadow-lg flex items-center justify-center ring-2 ring-green-200 animate-logo-float border border-green-300">
               <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-emerald-100 to-green-100" />
-              <img src="/agriai-icon-realistic.svg" alt="AgriAI" className="w-28 h-28 drop-shadow relative z-10" />
+              <img src="/agriai-logo-updated.svg" alt="AgriAI" className="w-28 h-28 drop-shadow relative z-10" />
           </div>
         </div>
         <div className="text-center">
