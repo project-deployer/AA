@@ -12,6 +12,7 @@ export default function ChatMessages({ fieldId, refreshKey = 0, onNewMessage }: 
   const { token } = useAuth();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(true);
+  const [speakingId, setSpeakingId] = useState<number | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -31,6 +32,26 @@ export default function ChatMessages({ fieldId, refreshKey = 0, onNewMessage }: 
       if (onNewMessage) onNewMessage();
     }
   }, [messages, loading, onNewMessage]);
+
+  const toggleSpeak = (message: ChatMessage) => {
+    if (typeof window === "undefined" || !window.speechSynthesis) {
+      alert("Voice playback is not supported in this browser.");
+      return;
+    }
+    if (speakingId === message.id) {
+      window.speechSynthesis.cancel();
+      setSpeakingId(null);
+      return;
+    }
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(message.content);
+    utterance.lang = "en-IN";
+    utterance.rate = 1.0;
+    utterance.onend = () => setSpeakingId(null);
+    utterance.onerror = () => setSpeakingId(null);
+    setSpeakingId(message.id);
+    window.speechSynthesis.speak(utterance);
+  };
 
   return (
     <>
@@ -76,13 +97,29 @@ export default function ChatMessages({ fieldId, refreshKey = 0, onNewMessage }: 
               >
                 <div
                   className={`
-                    max-w-[85%] rounded-2xl px-5 py-3 break-words
+                    max-w-[85%] rounded-2xl px-5 py-3 break-words relative
                     ${m.role === "user"
                       ? "bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-br-md shadow-md hover:shadow-lg transition-all duration-300"
                       : "glass-card border-gray-200 text-gray-800 rounded-bl-md hover:border-white/60 transition-all duration-300"}
                   `}
                 >
                   <p className="text-sm font-medium whitespace-pre-wrap break-words">{m.content}</p>
+                  {m.role === "assistant" && (
+                    <button
+                      type="button"
+                      onClick={() => toggleSpeak(m)}
+                      className={`absolute -top-3 -right-3 w-8 h-8 rounded-full border shadow-sm flex items-center justify-center text-xs transition ${
+                        speakingId === m.id
+                          ? "bg-emerald-600 text-white border-emerald-600"
+                          : "bg-white text-gray-600 border-gray-200 hover:border-emerald-400"
+                      }`}
+                      title={speakingId === m.id ? "Stop reading" : "Read aloud"}
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5l-7 6 7 6V5zm4 2a5 5 0 010 10m2-12a7 7 0 010 14" />
+                      </svg>
+                    </button>
+                  )}
                 </div>
               </div>
             ))

@@ -20,7 +20,35 @@ HF_LEGACY_URLS = [
 ]
 SYSTEM_PROMPT = """You are AgriAI, an agriculture expert helping Indian farmers with crop advice, fertilizers, soil health, irrigation, pest control, and weather-based recommendations. 
 
-Provide practical, actionable advice in simple language. Consider local Indian farming conditions, soil types, climate zones, and traditional practices. Always prioritize sustainable and cost-effective solutions."""
+Provide practical, actionable advice in simple language. Consider local Indian farming conditions, soil types, climate zones, and traditional practices. Always prioritize sustainable and cost-effective solutions.
+
+When user messages include attachment markers like [Image attached: ...] or [Video attached: ...]:
+- Acknowledge the attachment briefly.
+- Do NOT say "I can't view/access videos/images".
+- Give immediate useful guidance based on crop context and common field issues.
+- Ask up to 2 concise follow-up questions if visual details are needed."""
+
+
+def _prepare_user_message(user_message: str, crop_name: str = "") -> str:
+    """Normalize attachment-only messages into guidance-friendly prompts."""
+    raw = (user_message or "").strip()
+    if not raw:
+        return raw
+
+    has_video = "[video attached:" in raw.lower()
+    has_image = "[image attached:" in raw.lower()
+
+    if not (has_video or has_image):
+        return raw
+
+    attachment_type = "video" if has_video else "image"
+    crop_hint = crop_name or "the current crop"
+    return (
+        f"User shared a {attachment_type} from the field. "
+        f"Provide practical advice for {crop_hint} based on likely issues, "
+        "then ask up to 2 short questions to confirm symptoms. "
+        f"Original user message: {raw}"
+    )
 
 
 def _build_context(crop_name: str, recommendations: Optional[List[Dict[str, Any]]]) -> str:
@@ -61,11 +89,12 @@ async def get_ai_response(
         AI-generated response or fallback response
     """
     hf_token = (settings.hf_token or "").strip()
+    prepared_user_message = _prepare_user_message(user_message, crop_name)
     
     # Fallback to predefined responses if no token
     if not hf_token:
         print("⚠️  AI Chatbot: No HF_TOKEN found - using fallback responses")
-        return get_fallback_response(user_message, crop_name, recommendations)
+        return get_fallback_response(prepared_user_message, crop_name, recommendations)
     
     print(f"✅ AI Chatbot: HF_TOKEN found ({len(hf_token)} chars)")
     
@@ -85,7 +114,7 @@ async def get_ai_response(
                 messages.append(msg)
         
         # Add current user message
-        messages.append({"role": "user", "content": user_message})
+        messages.append({"role": "user", "content": prepared_user_message})
         
         print("🤖 AI Chatbot: Calling HuggingFace API...")
 
@@ -181,7 +210,7 @@ async def get_ai_response(
     except Exception as e:
         print(f"❌ AI chatbot error: {e}")
         # Fallback to predefined responses
-        return get_fallback_response(user_message, crop_name, recommendations)
+        return get_fallback_response(prepared_user_message, crop_name, recommendations)
 
 
 def _format_mistral_prompt(messages: List[Dict[str, str]]) -> str:

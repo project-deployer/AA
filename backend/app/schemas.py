@@ -15,6 +15,9 @@ class AuthVerifyResponse(BaseModel):
     success: bool = True
     farmer_id: int
     message: str = "Authenticated"
+    email: Optional[str] = None
+    display_name: Optional[str] = None
+    phone: Optional[str] = None
 
 
 class FieldCreate(BaseModel):

@@ -56,7 +56,7 @@ export default function LoginScreen({ onBack }: { onBack?: () => void }) {
         display_name: user.displayName || undefined,
       });
       console.log("Backend verification successful");
-      setAuth(idToken, res.farmer_id, user.displayName || "Farmer");
+      setAuth(idToken, res.farmer_id, res.display_name || user.displayName || "Farmer", undefined, res.email || user.email || undefined, res.phone || user.phoneNumber || undefined);
       navigate("/dashboard", { replace: true });
     } catch (err: any) {
       const errMsg = err?.message || String(err);

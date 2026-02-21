@@ -7,11 +7,13 @@ interface AuthState {
   farmerId: number | null;
   farmerName: string | null;
   profileImage: string | null;
+  email: string | null;
+  phone: string | null;
 }
 
 interface AuthContextValue extends AuthState {
   isAuthenticated: boolean;
-  setAuth: (token: string, farmerId: number, farmerName?: string, profileImage?: string) => void;
+  setAuth: (token: string, farmerId: number, farmerName?: string, profileImage?: string, email?: string, phone?: string) => void;
   updateProfile: (farmerName: string, profileImage?: string) => void;
   logout: () => void;
 }
@@ -27,11 +29,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (parsed.token && parsed.farmerId) return parsed;
       }
     } catch {}
-    return { token: null, farmerId: null, farmerName: null, profileImage: null };
+    return { token: null, farmerId: null, farmerName: null, profileImage: null, email: null, phone: null };
   });
 
-  const setAuth = useCallback((token: string, farmerId: number, farmerName?: string, profileImage?: string) => {
-    const next = { token, farmerId, farmerName: farmerName || null, profileImage: profileImage || null };
+  const setAuth = useCallback((token: string, farmerId: number, farmerName?: string, profileImage?: string, email?: string, phone?: string) => {
+    const next = { token, farmerId, farmerName: farmerName || null, profileImage: profileImage || null, email: email || null, phone: phone || null };
     setState(next);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
   }, []);
@@ -45,7 +47,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const logout = useCallback(() => {
-    setState({ token: null, farmerId: null, farmerName: null, profileImage: null });
+    setState({ token: null, farmerId: null, farmerName: null, profileImage: null, email: null, phone: null });
     localStorage.removeItem(STORAGE_KEY);
   }, []);
 

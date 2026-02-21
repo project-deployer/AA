@@ -25,7 +25,7 @@ async function request<T>(
 export const api = {
   auth: {
     verify: (idToken: string, payload?: { phone?: string; email?: string; display_name?: string }) =>
-      request<{ success: boolean; farmer_id: number }>("/auth/verify", {
+      request<{ success: boolean; farmer_id: number; email?: string; display_name?: string; phone?: string }>("/auth/verify", {
         method: "POST",
         body: JSON.stringify({
           id_token: idToken,

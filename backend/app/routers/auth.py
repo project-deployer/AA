@@ -27,4 +27,7 @@ def verify_token(req: AuthVerifyRequest, db: Session = Depends(get_db)):
         success=True,
         farmer_id=farmer.id,
         message="Authenticated",
+        email=farmer.email,
+        display_name=farmer.display_name,
+        phone=farmer.phone,
     )

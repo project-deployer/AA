@@ -66,7 +66,7 @@ export default function Dashboard() {
         loading={loading}
       />
       <div className="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden pb-20 lg:pb-0">
-        <header className="flex-shrink-0 flex items-center justify-end px-4 py-3 lg:px-6 border-b border-gray-200 glass-panel-light">
+        <header className="flex-shrink-0 flex items-center justify-end px-4 py-3 lg:px-6 border-b border-gray-200 glass-panel-light relative z-50">
           <UserProfile onOpenSettings={() => setSettingsOpen(true)} />
         </header>
         <div className="flex-1 flex min-w-0 min-h-0 overflow-hidden">
